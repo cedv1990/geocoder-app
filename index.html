@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="apple-touch-icon" href="logo192.png" />
+    <title>Geodecodificador - XP Colombia</title>
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+    <style>
+        body {
+            padding-top: 100px;
+        }
+    </style>
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+  </head>
+  <body>
+    <noscript>Necesitas habilitar JavaScript para correr esta app.</noscript>
+    <div id="root">
+    <div class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
+        <div class="container">
+          <a href="#" class="navbar-brand">Geocodificador - XP Colombia</a>
+        </div>
+      </div>
+      <div class="container">
+        <header class="page-header mb-5">
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12">
+              <h1>Búsqueda de barrio y localidad por direcciones</h1>
+            </div>
+          </div>
+        </header>
+        <div class="jumbotron pt-4 pb-4">
+            <form>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <label for="txt-direcciones">Direcciones para buscar</label>
+                        <textarea rows="5" class="form-control" required="" id="txt-direcciones"></textarea>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <button id="btnConsulta" class="btn btn-warning">Buscar...</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="jumbotron pt-4 pb-4" id="jumboResult" style="display: none;">
+            <div class="container">
+                <div class="row mb-4">
+                    <span class="badge badge-success">Encontrados: <span id="spnEncontrados"></span></span>
+                    <span class="badge badge-danger">Fallidos: <span id="spnFallidos"></span></span>
+                    <span class="badge badge-info">Faltan: <span id="spnFaltan"></span></span>
+                    <span class="badge badge-light" id="spnTiempo"></span>
+                </div>
+                <div class="row">
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                          <thead>
+                              <tr>
+                                  <th scope="col">Dirección ingresada</th>
+                                  <th scope="col">Dirección encontrada</th>
+                                  <th scope="col">Tipo dirección</th>
+                                  <th scope="col">Código postal</th>
+                                  <th scope="col">Sector catastral</th>
+                                  <th scope="col">Localidad</th>
+                                  <th scope="col">Maps</th>
+                              </tr>
+                          </thead>
+                          <tbody id="tbl">
+                              
+                          </tbody>
+                      </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/search.js"></script>
+  </body>
+</html>
