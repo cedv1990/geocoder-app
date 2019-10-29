@@ -7,32 +7,28 @@
     <meta name="theme-color" content="#000000" />
     <link rel="apple-touch-icon" href="logo192.png" />
     <title>Geodecodificador - XP Colombia</title>
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
+    <script>
+    
+      try {
+        eval('() => {}');
+      }
+      catch(e){
+        window.location.href = 'warning.html';
+      }
+
+    </script>
+
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    
     <script src="js/jquery-3.3.1.slim.min.js"></script>
     <script src="js/popper.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <style>
-        body {
-            padding-top: 100px;
-        }
-    </style>
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
   </head>
   <body>
     <noscript>Necesitas habilitar JavaScript para correr esta app.</noscript>
+    <aside id="menu"></aside>
     <div id="root">
       <div class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
         <div class="container">
@@ -64,23 +60,28 @@
         </div>
         <div class="jumbotron pt-4 pb-4" id="jumboResult" style="display: none;">
             <div class="container">
-                <div class="row mb-4">
+                <div class="row">
+                  <div class="col-sm-8">
                     <span class="badge badge-success mr-2 p-1"><i class="fas fa-check"></i> Encontrados: <span id="spnEncontrados"></span></span>
                     <span class="badge badge-danger mr-2 p-1"><i class="fas fa-times"></i> Fallidos: <span id="spnFallidos"></span></span>
                     <span class="badge badge-info mr-2 p-1"><i class="fas fa-tasks"></i> Faltan: <span id="spnFaltan"></span></span>
                     <span class="badge badge-light p-1" id="spnTiempo"></span>
+                  </div>
+                  <div class="col-sm-4 limpiar-filtros text-right mb-1">
+                      <button class="btn btn-sm btn-primary"><i class="fas fa-trash-alt"></i> Restaurar consulta</button>
+                  </div>
                 </div>
                 <div class="row">
                     <div class="table-responsive-md">
                       <table class="table table-hover table-sm">
                           <thead>
                               <tr>
-                                  <th scope="col">Dirección ingresada</th>
-                                  <th scope="col">Dirección encontrada</th>
-                                  <th scope="col">Tipo dirección</th>
-                                  <th scope="col">Código postal</th>
-                                  <th scope="col">Sector catastral</th>
-                                  <th scope="col">Localidad</th>
+                                  <th scope="col" field="dirinput" filtrable="false" orderable="false">Dirección ingresada <i class="fas fa-caret-down"></i></th>
+                                  <th scope="col" field="dirtrad" filtrable="false" orderable="false">Dirección encontrada <i class="fas fa-caret-down"></i></th>
+                                  <th scope="col" field="tipo_direccion" filtrable="false" orderable="false">Tipo dirección <i class="fas fa-caret-down"></i></th>
+                                  <th scope="col" field="cpocodigo" filtrable="false" orderable="true">Código postal <i class="fas fa-caret-down"></i></th>
+                                  <th scope="col" field="nomseccat" filtrable="true" orderable="true">Sector catastral <i class="fas fa-caret-down"></i></th>
+                                  <th scope="col" field="localidad" filtrable="true" orderable="true">Localidad <i class="fas fa-caret-down"></i></th>
                                   <th scope="col">Maps</th>
                               </tr>
                           </thead>

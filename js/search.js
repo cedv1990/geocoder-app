@@ -7,13 +7,18 @@ var spnEncontrados = document.getElementById('spnEncontrados');
 var spnFallidos = document.getElementById('spnFallidos');
 var spnFaltan = document.getElementById('spnFaltan');
 var spnTiempo = document.getElementById('spnTiempo');
+var columnas = document.querySelectorAll('[field][orderable="true"],[field][filtrable="true"], [field][orderable="true"] > i,[field][filtrable="true"] > i');
+var menu = document.getElementById('menu');
+var tabla = document.querySelector('table');
+var btnRestaura = document.querySelector('.limpiar-filtros > button');
 
 var nOk,
     nEr,
     nTo,
     numeroRecursiones,
     direcciones,
-    time;
+    time,
+    eventosColumnasActivos = false;
 
 var worker = new Worker('js/service.js');
 
@@ -28,7 +33,7 @@ btnConsulta.onclick = function() {
         nTo = 0;
         time = new Date().getTime();
         spnTiempo.innerHTML = '';
-        direcciones = txtDirecciones.value.split('\n');
+        direcciones = txtDirecciones.value.split('\n').filter(function(dir){ return dir.replace(/ /ig, '') !== ''; });
         mostrarDirecciones();
     }
 };
@@ -42,6 +47,8 @@ var mostrarDirecciones = function() {
     spnFallidos.innerHTML = '0';
 
     direcciones = direcciones.map(function(dir, index){ return { dir: dir, index: index }; });
+
+    tabla.classList.add('searching');
 
     direcciones.forEach(function(dir) {
         crearFilaConsultando(dir.dir, dir.index);
@@ -69,9 +76,14 @@ var crearFilaConsultando = function(dir, index) {
     img.setAttribute('height', '30');
 
     td.appendChild(img);
+    td.appendChild(document.createTextNode(' Consultando dirección: ' + dir));
     tr.appendChild(td);
     tbl.appendChild(tr);
 };
+
+var terminoProceso = function(){
+    return (nTo - (nOk + nEr)) === 0;
+}
 
 var mostrarNumeros = function() {
     spnEncontrados.innerHTML = nOk;
@@ -80,7 +92,9 @@ var mostrarNumeros = function() {
     if ((nOk + nEr) % 200 == 0) {
         consultar(200);
     }
-    if ((nTo - (nOk + nEr)) === 0) {
+    if (terminoProceso()) {
+        tabla.classList.remove('searching');
+
         var tiempo = new Date().getTime() - time;
         tiempo/=1000;
         var hours = Math.floor( tiempo / 3600 );  
@@ -92,6 +106,9 @@ var mostrarNumeros = function() {
         seconds = seconds < 10 ? '0' + seconds : seconds;
 
         spnTiempo.innerHTML = `<i class="fas fa-stopwatch"></i> Tiempo de consulta: ${hours}:${minutes}:${round(seconds, 3)}`;
+
+        inicializarFiltros();
+        eventosColumnasActivos = true;
     }
 };
 
@@ -104,7 +121,7 @@ var consultar = function(n) {
     }
 };
 
-var crearFilaResultado = function(result, id, dir) {
+var crearFilaResultado = function(result, id, dir, sum = true) {
     if (!result) {
         var td = document.getElementById('td-' + id);
         td.innerHTML = '';
@@ -114,8 +131,10 @@ var crearFilaResultado = function(result, id, dir) {
         p.innerHTML = 'Falló la búsqueda de la dirección ' + dir;
 
         td.appendChild(p);
-        nEr++;
-        mostrarNumeros();
+        if (sum){
+            nEr++;
+            mostrarNumeros();
+        }
         return;
     }
 
@@ -147,8 +166,11 @@ var crearFilaResultado = function(result, id, dir) {
     td.appendChild(a);
     tr.appendChild(td);
 
-    nOk++;
-    mostrarNumeros();
+    if (sum){
+        direcciones[id].data = { dirinput, dirtrad, tipo_direccion, cpocodigo, nomseccat, codseccat, localidad, latitude, longitude };
+        nOk++;
+        mostrarNumeros();
+    }
 };
 
 var round = function (num, decimales = 2) {
@@ -164,6 +186,80 @@ var round = function (num, decimales = 2) {
     return signo * (num[0] + 'e' + (num[1] ? (+num[1] - decimales) : -decimales));
 }
 
+var ordenarDatos = function(field, asc) {
+    tbl.innerHTML = '';
+    var ordered = direcciones.filter(a => a.data).sort((a, b) => {
+        if (a.data[field].toLowerCase() > b.data[field].toLowerCase())
+            return 1;
+        else if (b.data[field].toLowerCase() > a.data[field].toLowerCase())
+            return -1;
+        return 0;
+    });
+    if (!asc) ordered.reverse();
+
+    ordered.concat(direcciones.filter(a => !a.data)).forEach(function(obj){
+        crearFilaConsultando(obj.dir, obj.index);
+        crearFilaResultado(obj.data, obj.index, obj.dir, false);
+    });
+
+    btnRestaura.classList.add('visible');
+}
+
+var inicializarFiltros = function() {
+    if(!eventosColumnasActivos){
+        var mostrarMenu = function({top, left, filtrable, orderable, field}) {
+            menu.setAttribute('style', `top: ${top}px; left: ${left}px;`);
+            menu.classList.add('visible');
+            if (filtrable) {
+                var divfilter = document.createElement('div');
+                var txtFilter = document.createElement('input');
+                txtFilter.field = field;
+                txtFilter.classList.add('form-control');
+
+                var icon = document.createElement('i');
+                icon.classList.add('fas');
+                icon.classList.add('fa-search');
+                divfilter.appendChild(icon);
+                divfilter.appendChild(txtFilter);
+                menu.appendChild(divfilter);
+            }
+            if (orderable) {
+                var orderAscending = document.createElement('div');
+                orderAscending.innerHTML = '<i class="fas fa-sort-alpha-down"></i> Ordenar A-Z';
+                orderAscending.field = field;
+                orderAscending.onclick = function () {
+                    ordenarDatos(this.field, true);
+                };
+                menu.appendChild(orderAscending);
+
+                var orderDescending = document.createElement('div');
+                orderDescending.innerHTML = '<i class="fas fa-sort-alpha-up"></i> Ordenar Z-A';
+                orderDescending.field = field;
+                orderDescending.onclick = function () {
+                    ordenarDatos(this.field, false);
+                };
+                menu.appendChild(orderDescending);
+            }
+        };
+
+        columnas.forEach(function(col) {
+            col.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!tabla.classList.contains('searching')){
+                    var element = e.target;
+                    if (element.tagName !== 'TH') element = e.target.parentNode;
+                    menu.innerHTML = '';
+                    var { top, left, height } = element.getBoundingClientRect();
+                    var filtrable = element.getAttribute('filtrable') === 'true';
+                    var orderable = element.getAttribute('orderable') === 'true';
+                    var field = element.getAttribute('field');
+                    mostrarMenu({top: top + height + window.scrollY, left, filtrable, orderable, field});
+                }
+            });
+        });
+    }
+}
+
 worker.addEventListener('message', function (e) {
     var { id, data, dir } = e.data;
     crearFilaResultado(data, id, dir);
@@ -172,3 +268,26 @@ worker.addEventListener('message', function (e) {
 document.querySelectorAll('.year').forEach(function(el) {
     el.innerHTML = new Date().getFullYear();
 });
+
+document.body.onclick = function(e) {
+    if (
+        (!e.target.getAttribute('field') && !e.target.parentNode.getAttribute('field'))
+        ||
+        (e.target.getAttribute('filtrable') === 'false' && e.target.getAttribute('orderable') === 'false')
+        ||
+        (e.target.parentNode.getAttribute('filtrable') === 'false' && e.target.parentNode.getAttribute('orderable') === 'false')
+    ) {
+        menu.classList.remove('visible');
+    }
+}
+
+btnRestaura.onclick = function() {
+    this.classList.remove('visible');
+
+    tbl.innerHTML = '';
+
+    direcciones.forEach(function(obj){
+        crearFilaConsultando(obj.dir, obj.index);
+        crearFilaResultado(obj.data, obj.index, obj.dir, false);
+    });
+}

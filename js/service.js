@@ -1,4 +1,5 @@
 var consultaDireccion = function (dir, id) {
+    var dirOriginal = dir;
     dir = dir.replace(/av cl/gi, 'CL');
     dir = dir.replace(/av kr/gi, 'KR');
     dir = dir.replace(/av|ka|kr kr/gi, 'KR');
@@ -11,14 +12,14 @@ var consultaDireccion = function (dir, id) {
                 if (r.response.data)
                     self.postMessage({data:r.response.data,id:id,dir:dir});
                 else
-                    self.postMessage({data:null,id:id,dir:dir});
+                    self.postMessage({data:null,id:id,dir:dirOriginal});
             });
         else
-            self.postMessage({data:null,id:id,dir:dir});
+            self.postMessage({data:null,id:id,dir:dirOriginal});
     })
     .catch(e => {
-        console.log(e, {id:id,dir:dir});
-        self.postMessage({data:null,id:id,dir:dir});
+        console.log(e, {id:id,dir:dirOriginal});
+        self.postMessage({data:null,id:id,dir:dirOriginal});
     });
 }
 
