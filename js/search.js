@@ -91,7 +91,7 @@ var mostrarNumeros = function() {
         
         seconds = seconds < 10 ? '0' + seconds : seconds;
 
-        spnTiempo.innerHTML = `Tiempo de consulta: ${hours}:${minutes}:${round(seconds, 3)}`;
+        spnTiempo.innerHTML = `<i class="fas fa-stopwatch"></i> Tiempo de consulta: ${hours}:${minutes}:${round(seconds, 3)}`;
     }
 };
 
@@ -167,4 +167,8 @@ var round = function (num, decimales = 2) {
 worker.addEventListener('message', function (e) {
     var { id, data, dir } = e.data;
     crearFilaResultado(data, id, dir);
+});
+
+document.querySelectorAll('.year').forEach(function(el) {
+    el.innerHTML = new Date().getFullYear();
 });
