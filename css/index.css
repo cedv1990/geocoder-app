@@ -21,6 +21,7 @@ th[field][orderable="true"] {
     background-color: white;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 0.4rem;
+    z-index: 10;
     -webkit-box-shadow: 0px 2px 5px 0px rgba(50, 50, 50, 0.25);
     -moz-box-shadow:    0px 2px 5px 0px rgba(50, 50, 50, 0.25);
     box-shadow:         0px 2px 5px 0px rgba(50, 50, 50, 0.25);
@@ -53,4 +54,36 @@ th[field][orderable="true"] {
 
 .limpiar-filtros:not(.visible) {
     visibility: hidden;
+}
+
+.table-responsive-md {
+    position: relative;
+}
+
+thead th:nth-of-type(1) {
+    min-width: 158px;
+}
+
+thead th:nth-of-type(2) {
+    min-width: 170px;
+}
+
+thead th:nth-of-type(3) {
+    min-width: 178px;
+}
+
+thead th:nth-of-type(4) {
+    min-width: 130px;
+}
+
+thead th:nth-of-type(5) {
+    min-width: 192px;
+}
+
+thead th:nth-of-type(6) {
+    min-width: 96px;
+}
+
+thead th:nth-of-type(7) {
+    min-width: 60px;
 }

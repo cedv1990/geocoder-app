@@ -18,25 +18,10 @@ var nOk,
     numeroRecursiones,
     direcciones,
     time,
-    eventosColumnasActivos = false;
+    eventosColumnasActivos = false,
+    objFiltros = {};
 
 var worker = new Worker('js/service.js');
-
-form.onsubmit = function(e) {
-    e.preventDefault();
-};
-
-btnConsulta.onclick = function() {
-    if (form.checkValidity()) {
-        nOk = 0;
-        nEr = 0;
-        nTo = 0;
-        time = new Date().getTime();
-        spnTiempo.innerHTML = '';
-        direcciones = txtDirecciones.value.split('\n').filter(function(dir){ return dir.replace(/ /ig, '') !== ''; });
-        mostrarDirecciones();
-    }
-};
 
 var mostrarDirecciones = function() {
     jumboResult.removeAttribute('style');
@@ -186,9 +171,19 @@ var round = function (num, decimales = 2) {
     return signo * (num[0] + 'e' + (num[1] ? (+num[1] - decimales) : -decimales));
 }
 
+var filtrarDatos = function(field, text) {
+    tbl.innerHTML = '';
+    tbl.data = direcciones.filter(a => a.data && a.data[field].toLowerCase().lastIndexOf(text) >= 0);
+    tbl.data.forEach(function(obj){
+        crearFilaConsultando(obj.dir, obj.index);
+        crearFilaResultado(obj.data, obj.index, obj.dir, false);
+    });
+    btnRestaura.classList.add('visible');
+}
+
 var ordenarDatos = function(field, asc) {
     tbl.innerHTML = '';
-    var ordered = direcciones.filter(a => a.data).sort((a, b) => {
+    var ordered = tbl.data.filter(a => a.data).sort((a, b) => {
         if (a.data[field].toLowerCase() > b.data[field].toLowerCase())
             return 1;
         else if (b.data[field].toLowerCase() > a.data[field].toLowerCase())
@@ -197,7 +192,9 @@ var ordenarDatos = function(field, asc) {
     });
     if (!asc) ordered.reverse();
 
-    ordered.concat(direcciones.filter(a => !a.data)).forEach(function(obj){
+    tbl.data = ordered.concat(tbl.data.filter(a => !a.data));
+
+    tbl.data.forEach(function(obj){
         crearFilaConsultando(obj.dir, obj.index);
         crearFilaResultado(obj.data, obj.index, obj.dir, false);
     });
@@ -208,6 +205,7 @@ var ordenarDatos = function(field, asc) {
 var inicializarFiltros = function() {
     if(!eventosColumnasActivos){
         var mostrarMenu = function({top, left, filtrable, orderable, field}) {
+            objFiltros[field] = objFiltros[field] || {};
             menu.setAttribute('style', `top: ${top}px; left: ${left}px;`);
             menu.classList.add('visible');
             if (filtrable) {
@@ -215,6 +213,13 @@ var inicializarFiltros = function() {
                 var txtFilter = document.createElement('input');
                 txtFilter.field = field;
                 txtFilter.classList.add('form-control');
+                if (objFiltros[field] && objFiltros[field].filterText)
+                    txtFilter.value = objFiltros[field].filterText;
+
+                txtFilter.onkeyup = function() {
+                    filtrarDatos(this.field, this.value);
+                    objFiltros[this.field].filterText = this.value
+                };
 
                 var icon = document.createElement('i');
                 icon.classList.add('fas');
@@ -229,6 +234,8 @@ var inicializarFiltros = function() {
                 orderAscending.field = field;
                 orderAscending.onclick = function () {
                     ordenarDatos(this.field, true);
+                    objFiltros[field].orderedAsc = true;
+                    objFiltros[field].orderedDes = false;
                 };
                 menu.appendChild(orderAscending);
 
@@ -237,6 +244,8 @@ var inicializarFiltros = function() {
                 orderDescending.field = field;
                 orderDescending.onclick = function () {
                     ordenarDatos(this.field, false);
+                    objFiltros[field].orderedAsc = false;
+                    objFiltros[field].orderedDes = true;
                 };
                 menu.appendChild(orderDescending);
             }
@@ -257,6 +266,8 @@ var inicializarFiltros = function() {
                 }
             });
         });
+
+        tbl.data = direcciones;
     }
 }
 
@@ -277,12 +288,14 @@ document.body.onclick = function(e) {
         ||
         (e.target.parentNode.getAttribute('filtrable') === 'false' && e.target.parentNode.getAttribute('orderable') === 'false')
     ) {
-        menu.classList.remove('visible');
+        if (e.target.tagName !== 'INPUT')
+            menu.classList.remove('visible');
     }
-}
+};
 
 btnRestaura.onclick = function() {
     this.classList.remove('visible');
+    objFiltros = {};
 
     tbl.innerHTML = '';
 
@@ -290,4 +303,32 @@ btnRestaura.onclick = function() {
         crearFilaConsultando(obj.dir, obj.index);
         crearFilaResultado(obj.data, obj.index, obj.dir, false);
     });
-}
+
+    tbl.data = direcciones;
+};
+
+var onScroll = function () {
+    menu.classList.remove('visible');
+};
+
+document.querySelector('.table-responsive-md').onscroll = onScroll;
+
+document.querySelector('.table-responsive-md').ontouchmove = onScroll;
+
+form.onsubmit = function(e) {
+    e.preventDefault();
+};
+
+btnConsulta.onclick = function() {
+    if (form.checkValidity()) {
+        nOk = 0;
+        nEr = 0;
+        nTo = 0;
+        time = new Date().getTime();
+        spnTiempo.innerHTML = '';
+        objFiltros = {};
+        eventosColumnasActivos = false;
+        direcciones = txtDirecciones.value.split('\n').filter(function(dir){ return dir.replace(/ /ig, '') !== ''; });
+        mostrarDirecciones();
+    }
+};
