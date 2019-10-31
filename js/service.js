@@ -1,5 +1,5 @@
-var consultaDireccion = function (dir, id) {
-    var dirOriginal = dir;
+const consultaDireccion = (dir, id) => {
+    let dirOriginal = dir;
     dir = dir.replace(/av cl/gi, 'CL');
     dir = dir.replace(/av kr/gi, 'KR');
     dir = dir.replace(/av|ka|kr kr/gi, 'KR');
@@ -10,27 +10,27 @@ var consultaDireccion = function (dir, id) {
         if (res.ok) 
             res.json().then(r => {
                 if (r.response.data)
-                    self.postMessage({data:r.response.data,id:id,dir:dir});
+                    self.postMessage({ data: r.response.data, id, dir });
                 else
-                    self.postMessage({data:null,id:id,dir:dirOriginal});
+                    self.postMessage({ data: null, id, dir: dirOriginal });
             });
         else
-            self.postMessage({data:null,id:id,dir:dirOriginal});
+            self.postMessage({ data: null, id, dir: dirOriginal });
     })
     .catch(e => {
-        console.log(e, {id:id,dir:dirOriginal});
-        self.postMessage({data:null,id:id,dir:dirOriginal});
+        console.log(e, { id, dir: dirOriginal });
+        self.postMessage({ data: null, id, dir: dirOriginal });
     });
-}
+};
 
-self.addEventListener('message', function (e) {
-    var data = e.data;
-    var { dir, id } = data;
+self.addEventListener('message', e => {
+    let data = e.data;
+    let { dir, id } = data;
     switch (data.cmd) {
         case 'consultar':
             consultaDireccion(dir, id);
             break;
         default:
             self.postMessage({ 'result': 'comandoDesconocido' });
-    };
+    }
 }, false);
