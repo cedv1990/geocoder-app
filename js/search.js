@@ -1,18 +1,18 @@
-var form = document.getElementsByTagName('form')[0];
-var btnConsulta = document.getElementById('btnConsulta');
-var txtDirecciones = document.getElementById('txt-direcciones');
-var jumboResult = document.getElementById('jumboResult');
-var tbl = document.getElementById('tbl');
-var spnEncontrados = document.getElementById('spnEncontrados');
-var spnFallidos = document.getElementById('spnFallidos');
-var spnFaltan = document.getElementById('spnFaltan');
-var spnTiempo = document.getElementById('spnTiempo');
-var columnas = document.querySelectorAll('[field][orderable="true"],[field][filtrable="true"], [field][orderable="true"] > i,[field][filtrable="true"] > i');
-var menu = document.getElementById('menu');
-var tabla = document.querySelector('table');
-var btnRestaura = document.querySelector('.limpiar-filtros > button');
+const form = document.getElementsByTagName('form')[0],
+    btnConsulta = document.getElementById('btnConsulta'),
+    txtDirecciones = document.getElementById('txt-direcciones'),
+    jumboResult = document.getElementById('jumboResult'),
+    tbl = document.getElementById('tbl'),
+    spnEncontrados = document.getElementById('spnEncontrados'),
+    spnFallidos = document.getElementById('spnFallidos'),
+    spnFaltan = document.getElementById('spnFaltan'),
+    spnTiempo = document.getElementById('spnTiempo'),
+    columnas = document.querySelectorAll('[field][orderable="true"],[field][filtrable="true"], [field][orderable="true"] > i,[field][filtrable="true"] > i'),
+    menu = document.getElementById('menu'),
+    tabla = document.querySelector('table'),
+    btnRestaura = document.querySelector('.limpiar-filtros > button');
 
-var nOk,
+let nOk,
     nEr,
     nTo,
     numeroRecursiones,
@@ -21,9 +21,9 @@ var nOk,
     eventosColumnasActivos = false,
     objFiltros = {};
 
-var worker = new Worker('js/service.js');
+const worker = new Worker('js/service.js');
 
-var mostrarDirecciones = function() {
+const mostrarDirecciones = _ => {
     jumboResult.removeAttribute('style');
     nTo = direcciones.length;
     tbl.innerHTML = '';
@@ -31,13 +31,11 @@ var mostrarDirecciones = function() {
     spnEncontrados.innerHTML = '0';
     spnFallidos.innerHTML = '0';
 
-    direcciones = direcciones.map(function(dir, index){ return { dir: dir, index: index }; });
+    direcciones = direcciones.map((dir, index) => { return { dir: dir, index: index } });
 
     tabla.classList.add('searching');
 
-    direcciones.forEach(function(dir) {
-        crearFilaConsultando(dir.dir, dir.index);
-    });
+    direcciones.forEach(dir => crearFilaConsultando(dir.dir, dir.index));
 
     numeroRecursiones = 0;
     consultar(200);
@@ -48,15 +46,15 @@ var mostrarDirecciones = function() {
     });
 };
 
-var crearFilaConsultando = function(dir, index) {
-    var tr = document.createElement('tr');
+const crearFilaConsultando = (dir, index) => {
+    let tr = document.createElement('tr');
     tr.setAttribute('id', 'tr-' + index);
 
-    var td = document.createElement('td');
+    let td = document.createElement('td');
     td.setAttribute('colspan', '7');
     td.setAttribute('id', 'td-' + index);
 
-    var img = document.createElement('img');
+    let img = document.createElement('img');
     img.setAttribute('src', 'css/searching.gif');
     img.setAttribute('height', '30');
 
@@ -66,11 +64,9 @@ var crearFilaConsultando = function(dir, index) {
     tbl.appendChild(tr);
 };
 
-var terminoProceso = function(){
-    return (nTo - (nOk + nEr)) === 0;
-}
+const terminoProceso = _ => (nTo - (nOk + nEr)) === 0;
 
-var mostrarNumeros = function() {
+const mostrarNumeros = _ => {
     spnEncontrados.innerHTML = nOk;
     spnFallidos.innerHTML = nEr;
     spnFaltan.innerHTML = nTo - (nOk + nEr);
@@ -80,11 +76,11 @@ var mostrarNumeros = function() {
     if (terminoProceso()) {
         tabla.classList.remove('searching');
 
-        var tiempo = new Date().getTime() - time;
+        let tiempo = new Date().getTime() - time;
         tiempo/=1000;
-        var hours = Math.floor( tiempo / 3600 );  
-        var minutes = Math.floor( (tiempo % 3600) / 60 );
-        var seconds = tiempo % 60;
+        let hours = Math.floor( tiempo / 3600 );  
+        let minutes = Math.floor( (tiempo % 3600) / 60 );
+        let seconds = tiempo % 60;
 
         minutes = minutes < 10 ? '0' + minutes : minutes;
         
@@ -97,39 +93,39 @@ var mostrarNumeros = function() {
     }
 };
 
-var consultar = function(n) {
-    var d = direcciones.slice(numeroRecursiones * n, (numeroRecursiones * n) + n);
+const consultar = n => {
+    let d = direcciones.slice(numeroRecursiones * n, (numeroRecursiones * n) + n);
     numeroRecursiones++;
 
-    for (var i = 0; i < n && i < d.length; i++) {
+    for (let i = 0; i < n && i < d.length; i++) {
         worker.postMessage({ 'cmd': 'consultar', 'dir': d[i].dir, 'id': d[i].index });
     }
 };
 
-var crearFilaResultado = function(result, id, dir, sum = true) {
+const crearFilaResultado = (result, id, dir, sum = true) => {
     if (!result) {
-        var td = document.getElementById('td-' + id);
+        let td = document.getElementById('td-' + id);
         td.innerHTML = '';
 
-        var p = document.createElement('p');
+        let p = document.createElement('p');
         p.classList.add('text-warning');
         p.innerHTML = 'Falló la búsqueda de la dirección ' + dir;
 
         td.appendChild(p);
-        if (sum){
+        if (sum) {
             nEr++;
             mostrarNumeros();
         }
         return;
     }
 
-    var { dirinput, dirtrad, tipo_direccion, cpocodigo, nomseccat, codseccat, localidad, latitude, longitude } = result;
+    let { dirinput, dirtrad, tipo_direccion, cpocodigo, nomseccat, codseccat, localidad, latitude, longitude } = result;
 
-    var tr = document.getElementById('tr-' + id);
+    let tr = document.getElementById('tr-' + id);
     tr.innerHTML = '';
 
-    var agregarTd = function(t) {
-        var td = document.createElement('td');
+    let agregarTd = t => {
+        let td = document.createElement('td');
         td.appendChild(document.createTextNode(t))
         tr.appendChild(td);
     }
@@ -141,8 +137,8 @@ var crearFilaResultado = function(result, id, dir, sum = true) {
     agregarTd(nomseccat + ' (Cód.: ' + codseccat + ')');
     agregarTd(localidad);
 
-    var td = document.createElement('td');
-    var a = document.createElement('a');
+    let td = document.createElement('td');
+    let a = document.createElement('a');
     a.setAttribute('href', `https://www.google.com/maps/?q=${latitude},${longitude}`);
     a.setAttribute('target', '_blank');
     a.classList.add('btn'); 
@@ -151,15 +147,15 @@ var crearFilaResultado = function(result, id, dir, sum = true) {
     td.appendChild(a);
     tr.appendChild(td);
 
-    if (sum){
+    if (sum) {
         direcciones[id].data = { dirinput, dirtrad, tipo_direccion, cpocodigo, nomseccat, codseccat, localidad, latitude, longitude };
         nOk++;
         mostrarNumeros();
     }
 };
 
-var round = function (num, decimales = 2) {
-    var signo = (num >= 0 ? 1 : -1);
+const round = (num, decimales = 2) => {
+    let signo = (num >= 0 ? 1 : -1);
     num = num * signo;
     if (decimales === 0) //con 0 decimales
         return signo * Math.round(num);
@@ -171,19 +167,24 @@ var round = function (num, decimales = 2) {
     return signo * (num[0] + 'e' + (num[1] ? (+num[1] - decimales) : -decimales));
 }
 
-var filtrarDatos = function(field, text) {
-    tbl.innerHTML = '';
-    tbl.data = direcciones.filter(a => a.data && a.data[field].toLowerCase().lastIndexOf(text) >= 0);
-    tbl.data.forEach(function(obj){
+const pintarTablaFiltrada = (data, restaurar = true) => {
+    data.forEach(obj => {
         crearFilaConsultando(obj.dir, obj.index);
         crearFilaResultado(obj.data, obj.index, obj.dir, false);
     });
-    btnRestaura.classList.add('visible');
-}
+    if (restaurar)
+        btnRestaura.classList.add('visible');
+};
 
-var ordenarDatos = function(field, asc) {
+const filtrarDatos = (field, text) => {
     tbl.innerHTML = '';
-    var ordered = tbl.data.filter(a => a.data).sort((a, b) => {
+    tbl.data = direcciones.filter(a => a.data && a.data[field].toLowerCase().lastIndexOf(text) >= 0);
+    pintarTablaFiltrada(tbl.data);
+};
+
+const ordenarDatos = (field, asc) => {
+    tbl.innerHTML = '';
+    let ordered = tbl.data.filter(a => a.data).sort((a, b) => {
         if (a.data[field].toLowerCase() > b.data[field].toLowerCase())
             return 1;
         else if (b.data[field].toLowerCase() > a.data[field].toLowerCase())
@@ -194,20 +195,17 @@ var ordenarDatos = function(field, asc) {
 
     tbl.data = ordered.concat(tbl.data.filter(a => !a.data));
 
-    tbl.data.forEach(function(obj){
-        crearFilaConsultando(obj.dir, obj.index);
-        crearFilaResultado(obj.data, obj.index, obj.dir, false);
-    });
+    pintarTablaFiltrada(tbl.data);
+};
 
-    btnRestaura.classList.add('visible');
-}
-
-var inicializarFiltros = function() {
-    if(!eventosColumnasActivos){
-        var mostrarMenu = function({top, left, filtrable, orderable, field}) {
+const inicializarFiltros = _ => {
+    if(!eventosColumnasActivos) {
+        let mostrarMenu = ({ top, left, filtrable, orderable, field }) => {
             objFiltros[field] = objFiltros[field] || {};
+
             menu.setAttribute('style', `top: ${top}px; left: ${left}px;`);
             menu.classList.add('visible');
+            
             if (filtrable) {
                 var divfilter = document.createElement('div');
                 var txtFilter = document.createElement('input');
@@ -251,8 +249,8 @@ var inicializarFiltros = function() {
             }
         };
 
-        columnas.forEach(function(col) {
-            col.addEventListener('click', function(e) {
+        columnas.forEach(col => {
+            col.addEventListener('click', e => {
                 e.preventDefault();
                 if (!tabla.classList.contains('searching')){
                     var element = e.target;
@@ -271,16 +269,14 @@ var inicializarFiltros = function() {
     }
 }
 
-worker.addEventListener('message', function (e) {
-    var { id, data, dir } = e.data;
+worker.addEventListener('message', e => {
+    let { id, data, dir } = e.data;
     crearFilaResultado(data, id, dir);
 });
 
-document.querySelectorAll('.year').forEach(function(el) {
-    el.innerHTML = new Date().getFullYear();
-});
+document.querySelectorAll('.year').forEach(el => el.innerHTML = new Date().getFullYear());
 
-document.body.onclick = function(e) {
+document.body.onclick = e => {
     if (
         (!e.target.getAttribute('field') && !e.target.parentNode.getAttribute('field'))
         ||
@@ -299,27 +295,20 @@ btnRestaura.onclick = function() {
 
     tbl.innerHTML = '';
 
-    direcciones.forEach(function(obj){
-        crearFilaConsultando(obj.dir, obj.index);
-        crearFilaResultado(obj.data, obj.index, obj.dir, false);
-    });
+    pintarTablaFiltrada(direcciones, false);
 
     tbl.data = direcciones;
 };
 
-var onScroll = function () {
-    menu.classList.remove('visible');
-};
+const onScroll = _ => menu.classList.remove('visible');
 
 document.querySelector('.table-responsive-md').onscroll = onScroll;
 
 document.querySelector('.table-responsive-md').ontouchmove = onScroll;
 
-form.onsubmit = function(e) {
-    e.preventDefault();
-};
+form.onsubmit = e => e.preventDefault();
 
-btnConsulta.onclick = function() {
+btnConsulta.onclick = _ => {
     if (form.checkValidity()) {
         nOk = 0;
         nEr = 0;
@@ -328,7 +317,7 @@ btnConsulta.onclick = function() {
         spnTiempo.innerHTML = '';
         objFiltros = {};
         eventosColumnasActivos = false;
-        direcciones = txtDirecciones.value.split('\n').filter(function(dir){ return dir.replace(/ /ig, '') !== ''; });
+        direcciones = txtDirecciones.value.split('\n').filter(dir => dir.replace(/ /ig, '') !== '');
         mostrarDirecciones();
     }
 };

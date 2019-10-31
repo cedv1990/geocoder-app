@@ -52,6 +52,10 @@ th[field][orderable="true"] {
     margin-right: 5px;
 }
 
+#menu > div > input {
+    width: 152px;
+}
+
 .limpiar-filtros:not(.visible) {
     visibility: hidden;
 }
@@ -87,3 +91,4 @@ thead th:nth-of-type(6) {
 thead th:nth-of-type(7) {
     min-width: 60px;
 }
+
